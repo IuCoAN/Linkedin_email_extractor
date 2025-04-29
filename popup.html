@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Email Extractor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9fafb;
+            min-width: 350px;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            padding: 16px;
+        }
+        
+        /* Header styling */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .header-title {
+            display: flex;
+            align-items: center;
+        }
+        
+        .header-title i {
+            color: #0a66c2;
+            font-size: 24px;
+            margin-right: 12px;
+        }
+        
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .header-actions button {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 8px;
+            padding: 4px;
+        }
+        
+        .header-actions button:hover {
+            color: #374151;
+        }
+        
+        /* Status indicator */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background-color: #eff6ff;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            margin-right: 8px;
+        }
+        
+        .status-text {
+            font-size: 14px;
+            color: #1e40af;
+        }
+        
+        /* Card styling */
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .card-title {
+            font-weight: 500;
+            color: #374151;
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        /* Extract button */
+        .extract-btn {
+            background-color: #0a66c2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .extract-btn i {
+            margin-right: 8px;
+        }
+        
+        .extract-btn:hover {
+            background-color: #084e96;
+        }
+        
+        .extract-btn:disabled {
+            background-color: #93c5fd;
+            cursor: not-allowed;
+        }
+        
+        /* Checkbox styling */
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .checkbox-option input[type="checkbox"] {
+            height: 16px;
+            width: 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+        
+        .checkbox-option label {
+            font-size: 14px;
+            color: #4b5563;
+        }
+        
+        /* Results area */
+        .results-container {
+            max-height: 240px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 8px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 32px 0;
+            color: #9ca3af;
+        }
+        
+        .empty-state i {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .empty-state p {
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .email-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .email-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .email-item:last-child {
+            border-bottom: none;
+        }
+        
+        .email-text {
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .email-copy-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+        }
+        
+        .email-copy-btn:hover {
+            color: #3b82f6;
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        /* Settings panel */
+        .panel {
+            display: none;
+        }
+        
+        .panel.active {
+            display: block;
+        }
+        
+        .back-button {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .panel-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #374151;
+            margin: 0;
+        }
+        
+        /* Custom scrollbar */
+        .results-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .results-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .results-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .results-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Pulse animation */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Settings styles */
+        .setting-group {
+            margin-bottom: 16px;
+        }
+        
+        .setting-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+        
+        .setting-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #374151;
+            margin-top: 4px;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .slider {
+            flex: 1;
+            height: 4px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #0a66c2;
+            cursor: pointer;
+        }
+        
+        .slider-value {
+            margin-left: 8px;
+            font-size: 14px;
+            color: #4b5563;
+            min-width: 30px;
+        }
+        
+        .helper-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .danger-button {
+            width: 100%;
+            text-align: left;
+            padding: 8px 12px;
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .danger-button i {
+            margin-right: 8px;
+        }
+        
+        .danger-button:hover {
+            background-color: #fecaca;
+        }
+        
+        /* Help panel */
+        .help-section {
+            margin-bottom: 16px;
+        }
+        
+        .help-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .help-list {
+            padding-left: 20px;
+            margin: 0;
+        }
+        
+        .help-list li {
+            font-size: 14px;
+            color: #4b5563;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <i class="fab fa-linkedin"></i>
+                <h1>LinkedIn Email Extractor</h1>
+            </div>
+            <div class="header-actions">
+                <button id="settingsBtn" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button id="helpBtn" title="Help">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="mainContent" class="panel active">
+            <!-- Status Indicator -->
+            <div id="statusIndicator" class="status-indicator">
+                <div class="status-dot"></div>
+                <span class="status-text">Ready to extract emails</span>
+            </div>
+
+            <!-- Extraction Controls -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Extraction Options</h2>
+                    <div class="flex space-x-2">
+                        <button id="startScanBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center transition-all">
+                            <i class="fas fa-play mr-2"></i> Start Auto-Scan
+                        </button>
+                        <button id="stopScanBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center transition-all hidden">
+                            <i class="fas fa-stop mr-2"></i> Stop Scan
+                        </button>
+                        <button id="extractBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center transition-all">
+                            <i class="fas fa-at mr-2"></i> Extract Once
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="scanConnections" checked>
+                        <label for="scanConnections">Scan connections</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="scanMessages">
+                        <label for="scanMessages">Scan messages</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="scanProfile" checked>
+                        <label for="scanProfile">Scan current profile</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Extracted Emails</h2>
+                    <div>
+                        <button id="copyAllBtn" title="Copy all" class="email-copy-btn">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button id="exportBtn" title="Export CSV" class="email-copy-btn">
+                            <i class="fas fa-file-csv"></i>
+                        </button>
+                        <button id="clearBtn" title="Clear all" class="email-copy-btn">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="resultsContainer" class="results-container">
+                    <div id="emptyState" class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No emails extracted yet</p>
+                    </div>
+                    <ul id="emailList" class="email-list" style="display:none;"></ul>
+                </div>
+
+                <div class="stats-container">
+                    <span id="emailCount">0 emails</span>
+                    <span id="lastUpdated">Last scan: Never</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settingsPanel" class="panel">
+            <div class="panel-header">
+                <button id="backBtn" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 class="panel-title">Settings</h2>
+            </div>
+
+            <div class="card">
+                <div class="setting-group">
+                    <label class="setting-label">Scan Depth</label>
+                    <select id="scanDepth" class="setting-select">
+                        <option value="1">First level connections only</option>
+                        <option value="2">Second level connections</option>
+                        <option value="3">Third level connections</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">Email Validation</label>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="validateEmails" checked>
+                        <label for="validateEmails">Validate email formats</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="filterDisposable">
+                        <label for="filterDisposable">Filter disposable emails</label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">Rate Limiting</label>
+                    <div class="slider-container">
+                        <input type="range" id="scanDelay" class="slider" min="1" max="10" value="3">
+                        <span id="delayValue" class="slider-value">3s</span>
+                    </div>
+                    <p class="helper-text">Delay between requests to avoid detection</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title" style="margin-bottom: 12px; font-size: 14px;">Danger Zone</h3>
+                <button id="resetSettingsBtn" class="danger-button">
+                    <i class="fas fa-redo"></i> Reset to Default Settings
+                </button>
+            </div>
+        </div>
+
+        <!-- Help Panel -->
+        <div id="helpPanel" class="panel">
+            <div class="panel-header">
+                <button id="helpBackBtn" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 class="panel-title">Help & Instructions</h2>
+            </div>
+
+            <div class="card help-section">
+                <h3 class="help-title">How to use</h3>
+                <ol class="help-list">
+                    <li>Navigate to a LinkedIn profile or your connections page</li>
+                    <li>Click the "Extract Emails" button in this popup</li>
+                    <li>The extension will scan for email addresses in visible text</li>
+                    <li>Extracted emails will appear in the results section</li>
+                    <li>Use the copy or export buttons to save your results</li>
+                </ol>
+            </div>
+
+            <div class="card help-section">
+                <h3 class="help-title">Tips</h3>
+                <ul class="help-list">
+                    <li>For best results, visit the actual profile pages</li>
+                    <li>Some emails may be hidden behind "Contact info" buttons</li>
+                    <li>Adjust scan delay in settings if you encounter rate limiting</li>
+                    <li>Use the validation options to filter low-quality emails</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
