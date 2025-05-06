@@ -1,4 +1,4 @@
-# LinkedIn Email Extractor
+# LinkedIn Email Extractor Chrome Extension
 
 A powerful Chrome extension that automatically extracts email addresses from LinkedIn profiles, connection lists, and messages.
 
